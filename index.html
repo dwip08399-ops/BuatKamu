@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Portofolio Dwi Putra Cesa Sundawa — Linux, Termux, Vulnerability Disclosure.">
+<meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+<title>Dwi Putra Cesa Sundawa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   Design tokens
+═══════════════════════════════════════════ */
+:root, [data-theme="light"] {
+  --bg: #fafafa;
+  --card: #ffffff;
+  --muted: #f4f4f5;
+  --border: #e4e4e7;
+  --text: #18181b;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
+  --shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 28px -6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px -8px rgba(0, 0, 0, 0.12);
+  --nav: rgba(250, 250, 250, 0.84);
+  --overlay: rgba(24, 24, 27, 0.52);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dot: #22c55e;
+  --dot-ring: rgba(34, 197, 94, 0.35);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+}
+
+[data-theme="dark"] {
+  --bg: #09090b;
+  --card: #18181b;
+  --muted: #27272a;
+  --border: #3f3f46;
+  --text: #fafafa;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+  --shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 28px -6px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px -8px rgba(0, 0, 0, 0.55);
+  --nav: rgba(9, 9, 11, 0.88);
+  --overlay: rgba(0, 0, 0, 0.68);
+  --dot: #4ade80;
+  --dot-ring: rgba(74, 222, 128, 0.32);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.32s ease, color 0.32s ease;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.6s var(--ease);
+  will-change: opacity, transform;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+.d1 { transition-delay: 0.06s; }
+.d2 { transition-delay: 0.12s; }
+.d3 { transition-delay: 0.18s; }
+.d4 { transition-delay: 0.24s; }
+
+/* ── Navigation ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.05rem 2rem;
+  background: var(--nav);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.28s ease,
+    padding 0.28s ease,
+    background-color 0.32s ease;
+}
+nav.scrolled {
+  border-bottom-color: var(--border);
+  padding: 0.78rem 2rem;
+}
+
+.nav-brand {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: opacity 0.2s ease;
+}
+.nav-brand:hover { opacity: 0.75; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.35rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.55rem;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s ease;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 1.5px;
+  background: var(--text);
+  transition: width 0.25s var(--ease);
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+
+.theme-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s var(--ease),
+    background-color 0.25s ease;
+  flex-shrink: 0;
+}
+.theme-btn:hover {
+  border-color: var(--text-2);
+  transform: scale(1.05);
+}
+.theme-btn:active { transform: scale(0.94); }
+.theme-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.2s ease, transform 0.3s var(--ease);
+}
+.theme-btn .icon-sun { display: none; }
+.theme-btn .icon-moon { display: block; }
+[data-theme="dark"] .theme-btn .icon-sun { display: block; }
+[data-theme="dark"] .theme-btn .icon-moon { display: none; }
+
+/* ── Hero ── */
+#hero {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  padding: 6.75rem 2rem 3.75rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3.5rem;
+  align-items: center;
+  width: 100%;
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 1.05rem;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 5.2vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+  margin-bottom: 1.05rem;
+  color: var(--text);
+}
+
+.hero-role {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+}
+
+.hero-desc {
+  font-size: 0.935rem;
+  color: var(--text-2);
+  max-width: 480px;
+  margin-bottom: 1.75rem;
+  line-height: 1.72;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+}
+
+.chip {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.32rem 0.8rem;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.25s ease,
+    transform 0.2s var(--ease);
+}
+.chip:hover {
+  border-color: var(--text-2);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.cta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.72rem 1.4rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.22s var(--ease),
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.22s ease;
+}
+.btn-dark {
+  background: var(--text);
+  color: var(--bg);
+}
+.btn-dark:hover {
+  opacity: 0.92;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btn-dark:active { transform: translateY(0); }
+.btn-light {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-light:hover {
+  border-color: var(--text-2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.btn-light:active { transform: translateY(0); }
+
+/* Avatar */
+.avatar-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar {
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 4 / 5;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  background: var(--card);
+  position: relative;
+  transition:
+    transform 0.4s var(--ease),
+    box-shadow 0.4s ease,
+    border-color 0.3s ease;
+}
+.avatar:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.55s var(--ease);
+}
+.avatar:hover img {
+  transform: scale(1.03);
+}
+
+.avatar-badge {
+  position: absolute;
+  bottom: 1.05rem;
+  left: 1.05rem;
+  right: 1.05rem;
+  padding: 0.78rem 1.05rem;
+  background: color-mix(in srgb, var(--card) 93%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.avatar-badge strong {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.avatar-badge span {
+  font-size: 0.68rem;
+  color: var(--text-2);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+  position: relative;
+  flex-shrink: 0;
+}
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--dot-ring);
+  animation: pulse 2.2s ease-out infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+/* ── Sections ── */
+section {
+  padding: 5.25rem 2rem;
+  border-top: 1px solid var(--border);
+  transition: background-color 0.32s ease, border-color 0.32s ease;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 0.45rem;
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3.1vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  margin-bottom: 1.85rem;
+  line-height: 1.22;
+  color: var(--text);
+}
+
+/* ── Profil (tanpa skill bars) ── */
+#profil {
+  background: var(--card);
+}
+
+.bio-block {
+  max-width: 640px;
+}
+
+.bio-block p {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  margin-bottom: 1.15rem;
+  line-height: 1.8;
+}
+.bio-block p:last-child {
+  margin-bottom: 0;
+}
+.bio-block strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.bio-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  margin-top: 2rem;
+  max-width: 640px;
+}
+
+.bio-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.2rem;
+  transition:
+    border-color 0.25s ease,
+    transform 0.3s var(--ease),
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+.bio-card:hover {
+  border-color: var(--text-2);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+.bio-card-num {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.bio-card-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+/* ── Sertifikat ── */
+#sertifikat {
+  background: var(--bg);
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.65rem;
+  flex-wrap: wrap;
+}
+
+.search {
+  padding: 0.6rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 0.8rem;
+  color: var(--text);
+  outline: none;
+  width: 220px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.25s ease;
+}
+.search:focus {
+  border-color: var(--text-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 6%, transparent);
+}
+.search::placeholder {
+  color: var(--text-3);
+}
+
+.filters {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.filter {
+  padding: 0.42rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    all 0.2s ease,
+    transform 0.15s var(--ease);
+}
+.filter:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+.filter.active {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--muted);
+}
+.filter:active {
+  transform: scale(0.96);
+}
+
+.slider-wrap {
+  position: relative;
+}
+
+.slider {
+  display: flex;
+  gap: 1.05rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding: 0.35rem 0.1rem 1.35rem;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--muted);
+  touch-action: pan-x;
+}
+.slider::-webkit-scrollbar {
+  height: 5px;
+}
+.slider::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 99px;
+}
+.slider::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+.slider::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+}
+.slider.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.cert {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  /* no transform transition on mobile — biar geser tidak kaku */
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cert {
+    transition:
+      transform 0.28s var(--ease),
+      border-color 0.2s ease,
+      box-shadow 0.28s ease,
+      background-color 0.25s ease;
+  }
+  .cert:hover {
+    border-color: var(--text-2);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  .cert:hover .cert-img img {
+    transform: scale(1.04);
+  }
+}
+
+.cert-img {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.cert-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cert-img img {
+    transition: transform 0.45s var(--ease);
+  }
+}
+
+.cert-body {
+  padding: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cert-org {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 0.2rem;
+}
+
+.cert-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.cert-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-2);
+  border-top: 1px solid var(--muted);
+  padding-top: 0.7rem;
+  margin-top: 0.35rem;
+}
+.cert-foot .detail {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  text-align: right;
+  margin-top: 0.15rem;
+}
+
+/* ── Kontak ── */
+#kontak {
+  background: var(--card);
+}
+
+.contact-list {
+  max-width: 420px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1.2rem 1.35rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.2s ease;
+}
+.contact-item:last-child {
+  border-bottom: none;
+}
+.contact-item:hover {
+  background: var(--card);
+}
+.contact-item:active {
+  background: var(--muted);
+}
+
+.contact-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, transform 0.25s var(--ease);
+}
+.contact-item:hover .contact-icon {
+  border-color: var(--text-2);
+  transform: scale(1.04);
+}
+.contact-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke: var(--text);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.contact-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+  margin-bottom: 0.12rem;
+}
+.contact-val {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.contact-arrow {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: var(--text-3);
+  transition: transform 0.22s var(--ease), color 0.2s ease;
+}
+.contact-item:hover .contact-arrow {
+  transform: translate(3px, -3px);
+  color: var(--text);
+}
+
+/* ── Footer ── */
+footer {
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  transition: background-color 0.32s ease, border-color 0.32s ease, color 0.32s ease;
+}
+
+/* ── Modal ── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.modal-bg.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--card);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.96) translateY(12px);
+  transition:
+    transform 0.32s var(--ease),
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-bg.open .modal {
+  transform: scale(1) translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  border: 1px solid var(--border);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s var(--ease);
+}
+.modal-close:hover {
+  background: var(--text);
+  color: var(--bg);
+  transform: scale(1.05);
+}
+.modal-close:active {
+  transform: scale(0.95);
+}
+
+.modal-img {
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
+  max-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.modal-img img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.modal-body {
+  padding: 1.75rem;
+}
+
+.modal-cat {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 0.35rem;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+
+.modal-org {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  margin-bottom: 1.15rem;
+}
+
+.modal-hr {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 1.15rem;
+}
+
+.modal-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.modal-meta span:first-child {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+  margin-bottom: 0.18rem;
+}
+
+.modal-meta span:last-child {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-desc {
+  margin-top: 1.15rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--text-2);
+  line-height: 1.75;
+}
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  nav {
+    padding: 0.95rem 1.25rem;
+  }
+  nav.scrolled {
+    padding: 0.7rem 1.25rem;
+  }
+  .nav-links {
+    display: none;
+  }
+
+  #hero {
+    padding: 5.5rem 1.25rem 3rem;
+  }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .avatar-wrap {
+    order: -1;
+  }
+  .avatar {
+    max-width: 260px;
+  }
+
+  section {
+    padding: 4rem 1.25rem;
+  }
+
+  .bio-highlights {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search {
+    width: 100%;
+  }
+
+  .cert {
+    flex: 0 0 235px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.95rem;
+  }
+  .avatar {
+    max-width: 230px;
+  }
+  .cert {
+    flex: 0 0 210px;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#" class="nav-brand">Dwi Putra Cesa Sundawa</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#profil">Profil</a></li>
+      <li><a href="#sertifikat">Sertifikat</a></li>
+      <li><a href="#kontak">Kontak</a></li>
+    </ul>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="Ganti tema" title="Ganti tema">
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow reveal">Portofolio</div>
+      <h1 class="reveal d1">Dwi Putra<br>Cesa Sundawa</h1>
+      <p class="hero-role reveal d2">Linux &amp; Terminal Enthusiast · Mobile-First Infrastructure</p>
+      <p class="hero-desc reveal d2">Belajar mandiri lewat Android, Linux, dan Termux. Aktif dalam pengujian keamanan informasi secara etis dan pelaporan celah (Vulnerability Disclosure).</p>
+      <div class="chips reveal d3">
+        <span class="chip">Vulnerability Research</span>
+        <span class="chip">Linux CLI</span>
+        <span class="chip">Termux</span>
+        <span class="chip">Networking</span>
+      </div>
+      <div class="cta reveal d4">
+        <a href="#sertifikat" class="btn btn-dark">Lihat Sertifikat</a>
+        <a href="#kontak" class="btn btn-light">Hubungi Saya</a>
+      </div>
+    </div>
+    <div class="avatar-wrap reveal d2">
+      <div class="avatar">
+        <img
+          src="https://i.ibb.co.com/GfRz6khQ/IMG-32f4f5f8-d9e0-43a4-81bf-38acfacbb635.jpg"
+          alt="Dwi Putra Cesa Sundawa"
+          width="320"
+          height="400"
+          loading="eager"
+          decoding="async"
+          onerror="this.onerror=null;this.src='https://placehold.co/400x500/18181b/fff?text=DPCS'"
+        >
+        <div class="avatar-badge">
+          <div>
+            <strong>Dwi Putra Cesa S.</strong>
+            <span>Available</span>
+          </div>
+          <div class="pulse-dot" title="Active"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Profil -->
+<section id="profil">
+  <div class="container">
+    <div class="label reveal">Tentang</div>
+    <h2 class="section-title reveal d1">Latar belakang</h2>
+    <div class="bio-block reveal d2">
+      <p>Saya <strong>Dwi Putra Cesa Sundawa</strong>. Fokus pada eksplorasi dan riset keamanan informasi secara otodidak, sepenuhnya memakai Android, Linux, dan Termux.</p>
+      <p>Aktif menemukan dan melaporkan celah pada sistem instansi pemerintah serta lembaga edukasi melalui jalur Vulnerability Disclosure yang etis.</p>
+      <p>Setiap sertifikat apresiasi yang saya terima adalah bukti proses belajar mandiri, pemahaman arsitektur web, dan cara bekerja yang bertanggung jawab.</p>
+    </div>
+    <div class="bio-highlights reveal d3">
+      <div class="bio-card">
+        <div class="bio-card-num">7+</div>
+        <div class="bio-card-label">Sertifikat apresiasi dari instansi</div>
+      </div>
+      <div class="bio-card">
+        <div class="bio-card-num">100%</div>
+        <div class="bio-card-label">Belajar mandiri via Termux</div>
+      </div>
+      <div class="bio-card">
+        <div class="bio-card-num">2026</div>
+        <div class="bio-card-label">Aktif melaporkan celah etis</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sertifikat -->
+<section id="sertifikat">
+  <div class="container">
+    <div class="label reveal">Dokumentasi</div>
+    <h2 class="section-title reveal d1">Sertifikat &amp; apresiasi</h2>
+    <div class="controls reveal d2">
+      <input class="search" type="search" id="cSearch" placeholder="Cari wilayah / instansi..." oninput="filterCerts()" autocomplete="off" enterkeyhint="search">
+      <div class="filters" role="group" aria-label="Filter kategori">
+        <button type="button" class="filter active" data-tag="all" onclick="setTag('all', this)">Semua</button>
+        <button type="button" class="filter" data-tag="pemkab" onclick="setTag('pemkab', this)">Pemkab</button>
+        <button type="button" class="filter" data-tag="pemkot" onclick="setTag('pemkot', this)">Pemkot</button>
+        <button type="button" class="filter" data-tag="edukasi" onclick="setTag('edukasi', this)">Edukasi</button>
+      </div>
+    </div>
+    <div class="slider-wrap reveal d3">
+      <div class="slider" id="certList" role="list"></div>
+      <div class="hint">Geser untuk melihat · Ketuk untuk detail</div>
+    </div>
+  </div>
+</section>
+
+<!-- Kontak -->
+<section id="kontak">
+  <div class="container">
+    <div class="label reveal">Kontak</div>
+    <h2 class="section-title reveal d1">Mari terhubung</h2>
+    <div class="contact-list reveal d2">
+      <a href="https://www.instagram.com/4rs3c7?dlrf=MTJucHVjb2h0ZjdrOA==" target="_blank" rel="noopener noreferrer" class="contact-item">
+        <div class="contact-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </div>
+        <div>
+          <span class="contact-label">Instagram</span>
+          <span class="contact-val">@4rs3c7</span>
+        </div>
+        <span class="contact-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a href="https://wa.me/6285692094957" target="_blank" rel="noopener noreferrer" class="contact-item">
+        <div class="contact-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div>
+          <span class="contact-label">WhatsApp</span>
+          <span class="contact-val">+62 856-9209-4957</span>
+        </div>
+        <span class="contact-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a href="mailto:lesskua388@gmail.com" class="contact-item">
+        <div class="contact-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <span class="contact-label">Email</span>
+          <span class="contact-val">lesskua388@gmail.com</span>
+        </div>
+        <span class="contact-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 Dwi Putra Cesa Sundawa</footer>
+
+<!-- Modal sertifikat -->
+<div class="modal-bg" id="mBg" role="dialog" aria-modal="true" aria-labelledby="mTitle" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button type="button" class="modal-close" onclick="closeModal()" aria-label="Tutup">&times;</button>
+    <div class="modal-img">
+      <img id="mImg" src="" alt="">
+    </div>
+    <div class="modal-body">
+      <div class="modal-cat" id="mCat"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-org" id="mOrg"></div>
+      <div class="modal-hr"></div>
+      <div class="modal-meta">
+        <div><span>KATEGORI</span><span id="mTag"></span></div>
+        <div><span>TAHUN</span><span id="mYear"></span></div>
+      </div>
+      <div class="modal-desc" id="mDesc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Theme ── */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  var stored = null;
+  try { stored = localStorage.getItem('theme'); } catch (e) {}
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var theme = (stored === 'dark' || stored === 'light') ? stored : (prefersDark ? 'dark' : 'light');
+  root.setAttribute('data-theme', theme);
+
+  themeBtn.addEventListener('click', function () {
+    theme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch (e) {}
+  });
+
+  /* ── Certificate data ── */
+  var certs = [
+    {
+      name: 'Sertifikat Apresiasi Pemkab Gunungkidul',
+      org: 'CSIRT / Pemkab Gunungkidul',
+      year: '2026',
+      tag: 'pemkab',
+      img: 'https://i.ibb.co.com/JWjwML2s/Screenshot-20261028-192724-1.jpg',
+      desc: 'Apresiasi dari Pemerintah Kabupaten Gunungkidul atas kontribusi pelaporan dan koordinasi penanganan celah keamanan pada sistem informasi publik daerah.'
+    },
+    {
+      name: 'Sertifikat Apresiasi Pemkab Karanganyar',
+      org: 'CSIRT / Pemkab Karanganyar',
+      year: '2026',
+      tag: 'pemkab',
+      img: 'https://i.ibb.co.com/TxxgVJ79/Screenshot-20261028-192710-1.jpg',
+      desc: 'Penghargaan atas identifikasi dan penyampaian laporan kerentanan secara etis di lingkungan Pemerintah Kabupaten Karanganyar.'
+    },
+    {
+      name: 'Sertifikat Apresiasi Pemkot Cimahi',
+      org: 'CSIRT / Pemkot Cimahi',
+      year: '2026',
+      tag: 'pemkot',
+      img: 'https://i.ibb.co.com/9HSmGS5c/Screenshot-20261028-192733-1.jpg',
+      desc: 'Apresiasi atas temuan celah pada portal resmi Pemkot Cimahi, membantu meningkatkan keamanan layanan publik digital.'
+    },
+    {
+      name: 'Sertifikat Apresiasi MI Al Prima Kajen',
+      org: 'MI Al Prima Kajen',
+      year: '2026',
+      tag: 'edukasi',
+      img: 'https://i.ibb.co.com/TB86TSG1/Screenshot-20261028-192745-1.jpg',
+      desc: 'Penghargaan atas pengujian keamanan informasi dan pelaporan celah pada infrastruktur digital MI Al Prima Kajen.'
+    },
+    {
+      name: 'Sertifikat Apresiasi Pemkot Yogyakarta',
+      org: 'CSIRT / Pemkot Yogyakarta',
+      year: '2026',
+      tag: 'pemkot',
+      img: 'https://i.ibb.co.com/XZVsVPHQ/Screenshot-20261028-192804-1.jpg',
+      desc: 'Apresiasi dari Pemerintah Kota Yogyakarta atas kontribusi pelaporan kelemahan sistem informasi Pemkot.'
+    },
+    {
+      name: 'Sertifikat Apresiasi Pemkot Bekasi',
+      org: 'CSIRT / Pemkot Bekasi',
+      year: '2026',
+      tag: 'pemkot',
+      img: 'https://i.ibb.co.com/jvgtgqr8/Screenshot-20261028-192835-1.jpg',
+      desc: 'Apresiasi atas riset etis dan pelaporan celah keamanan pada domain Pemerintah Kota Bekasi.'
+    },
+    {
+      name: 'Sertifikat Apresiasi Pemkot Depok',
+      org: 'CSIRT / Pemkot Depok',
+      year: '2026',
+      tag: 'pemkot',
+      img: 'https://i.ibb.co.com/4ZhhSc7m/Screenshot-20261028-192826-1.jpg',
+      desc: 'Penghargaan dari CSIRT Kota Depok atas partisipasi menjaga keamanan aset digital pemerintah daerah.'
+    }
+  ];
+
+  var tagLabel = { pemkab: 'Pemkab', pemkot: 'Pemkot', edukasi: 'Edukasi' };
+  var activeTag = 'all';
+  var certList = document.getElementById('certList');
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function renderCerts(data) {
+    certList.innerHTML = '';
+    if (!data.length) {
+      certList.innerHTML = '<div style="color:var(--text-3);font-size:0.85rem;padding:2rem;text-align:center;width:100%">Tidak ditemukan.</div>';
+      return;
+    }
+    var frag = document.createDocumentFragment();
+    data.forEach(function (c) {
+      var card = document.createElement('div');
+      card.className = 'cert';
+      card.setAttribute('role', 'listitem');
+      card.innerHTML =
+        '<div class="cert-img">' +
+          '<img src="' + escapeHtml(c.img) + '" alt="' + escapeHtml(c.name) + '" loading="lazy" decoding="async" width="260" height="162" onerror="this.src=\'https://placehold.co/600x400/18181b/fff?text=Sertifikat\'">' +
+        '</div>' +
+        '<div class="cert-body">' +
+          '<div>' +
+            '<div class="cert-org">' + escapeHtml(c.org) + '</div>' +
+            '<div class="cert-name">' + escapeHtml(c.name) + '</div>' +
+          '</div>' +
+          '<div class="cert-foot">' +
+            '<span>' + escapeHtml(c.year) + '</span>' +
+            '<span class="detail">Detail →</span>' +
+          '</div>' +
+        '</div>';
+      card.addEventListener('click', function () {
+        if (!card.dataset.dragged) openModal(c);
+      });
+      frag.appendChild(card);
+    });
+    certList.appendChild(frag);
+  }
+
+  /* ── Slider: pure native scroll di touch; mouse drag opsional ── */
+  (function initSlider() {
+    var el = certList;
+    var dragging = false;
+    var startX = 0;
+    var startScroll = 0;
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchMoved = false;
+
+    /* Mouse drag (desktop) */
+    el.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      dragging = true;
+      startX = e.clientX;
+      startScroll = el.scrollLeft;
+      el.classList.add('is-dragging');
+      el.querySelectorAll('.cert').forEach(function (c) { delete c.dataset.dragged; });
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) {
+        el.querySelectorAll('.cert').forEach(function (c) { c.dataset.dragged = '1'; });
+      }
+      el.scrollLeft = startScroll - dx;
+    });
+
+    window.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('is-dragging');
+    });
+
+    /* Touch: biarkan browser yang scroll — jangan ganggu.
+       Hanya deteksi geser vs tap untuk modal. */
+    el.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchMoved = false;
+      el.querySelectorAll('.cert').forEach(function (c) { delete c.dataset.dragged; });
+    }, { passive: true });
+
+    el.addEventListener('touchmove', function (e) {
+      if (e.touches.length !== 1) return;
+      var dx = Math.abs(e.touches[0].clientX - touchStartX);
+      var dy = Math.abs(e.touches[0].clientY - touchStartY);
+      if (dx > 8 || dy > 8) {
+        touchMoved = true;
+        el.querySelectorAll('.cert').forEach(function (c) { c.dataset.dragged = '1'; });
+      }
+    }, { passive: true });
+
+    el.addEventListener('touchend', function () {
+      touchMoved = false;
+    }, { passive: true });
+  })();
+
+  window.filterCerts = function () {
+    var q = document.getElementById('cSearch').value.toLowerCase().trim();
+    renderCerts(certs.filter(function (c) {
+      var matchTag = activeTag === 'all' || c.tag === activeTag;
+      var matchQ = !q || c.name.toLowerCase().indexOf(q) !== -1 || c.org.toLowerCase().indexOf(q) !== -1;
+      return matchTag && matchQ;
+    }));
+  };
+
+  window.setTag = function (tag, btn) {
+    activeTag = tag;
+    document.querySelectorAll('.filter').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    filterCerts();
+  };
+
+  renderCerts(certs);
+
+  /* ── Modal ── */
+  var mBg = document.getElementById('mBg');
+
+  function openModal(c) {
+    document.getElementById('mImg').src = c.img;
+    document.getElementById('mImg').alt = c.name;
+    document.getElementById('mCat').textContent = c.org;
+    document.getElementById('mTitle').textContent = c.name;
+    document.getElementById('mOrg').textContent = c.org;
+    document.getElementById('mTag').textContent = tagLabel[c.tag] || c.tag;
+    document.getElementById('mYear').textContent = c.year;
+    document.getElementById('mDesc').textContent = c.desc;
+    mBg.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeModal = function () {
+    mBg.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  /* ── Scroll reveal ── */
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in');
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(function (el) {
+    obs.observe(el);
+  });
+
+  /* ── Nav scroll state ── */
+  var nav = document.getElementById('nav');
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      nav.classList.toggle('scrolled', window.scrollY > 18);
+      ticking = false;
+    });
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
